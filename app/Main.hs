@@ -1,34 +1,32 @@
 module Main where
 
 import Data.Function ((&))
-import Day01 (day01)
-import GHC.IO
+import qualified Day01
 import System.Environment (getArgs)
 import Text.Printf (printf)
 import Text.Read (readMaybe)
 
-usage = "usage: aoc <day> [input-file]"
+usage = "usage: aoc <day> <part> [input-file]"
 
-parseDay :: String -> Maybe Int
-parseDay arg = readMaybe arg :: Maybe Int
+parseInt :: String -> Maybe Int
+parseInt arg = readMaybe arg :: Maybe Int
 
-parseArgs :: [String] -> (Maybe Int, Maybe String)
-parseArgs [dayArg] = (parseDay dayArg, Nothing)
-parseArgs [dayArg, inputArg] = (parseDay dayArg, Just inputArg)
-parseArgs _ = (Nothing, Nothing)
+parseArgs :: [String] -> (Maybe Int, Maybe Int, Maybe String)
+parseArgs [dayArg, partArg] = (parseInt dayArg, parseInt partArg, Nothing)
+parseArgs [dayArg, partArg, inputArg] = (parseInt dayArg, parseInt partArg, Just inputArg)
+parseArgs _ = (Nothing, Nothing, Nothing)
 
-executeDay :: Int -> [String] -> String
-executeDay day inputLines
-  | day == 1 = day01 inputLines
-  | otherwise = ""
+executeDay :: Int -> Int -> [String] -> String
+executeDay 1 1 inputLines = Day01.part1 inputLines
+executeDay 1 2 inputLines = Day01.part2 inputLines
+executeDay _ part _ = "No such part: " ++ show part
 
 main :: IO ()
 main = do
   args <- getArgs
-  let parsedArgs = parseArgs args
-  let (day, inputName) = case parsedArgs of
-        (Just day, Nothing) -> (day, "input.txt")
-        (Just day, Just input) -> (day, input)
-        (_, _) -> error usage
-  input <- "app/day" ++ printf "%02d" day ++ "/" ++ inputName & readFile
-  putStrLn $ executeDay day $ lines input
+  let (day, part, inputName) = case parseArgs args of
+        (Just day, Just part, Nothing) -> (day, part, "input.txt")
+        (Just day, Just part, Just input) -> (day, part, input)
+        (_, _, _) -> error usage
+  input <- readFile $ "app/day" ++ printf "%02d" day ++ "/" ++ inputName
+  putStrLn $ executeDay day part $ lines input
