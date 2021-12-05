@@ -21,6 +21,7 @@ executeDay :: Int -> Int -> [String] -> String
 executeDay 1 1 inputLines = Day01.part1 inputLines
 executeDay 1 2 inputLines = Day01.part2 inputLines
 executeDay 2 1 inputLines = Day02.part1 inputLines
+executeDay 2 2 inputLines = Day02.part2 inputLines
 executeDay _ part _ = "No such part: " ++ show part
 
 main :: IO ()
