@@ -12,11 +12,13 @@ executable aoc
     main-is: Main.hs
     other-modules:
         Day01,
-        Day02
+        Day02,
+        Day03
     build-depends:
         base ^>=4.14.3.0,
     hs-source-dirs:
         app,
         app/day01,
-        app/day02
+        app/day02,
+        app/day03
     default-language: Haskell2010
