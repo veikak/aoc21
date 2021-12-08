@@ -4,6 +4,7 @@ import Data.Function ((&))
 import qualified Day01
 import qualified Day02
 import qualified Day03
+import qualified Day04
 import System.Environment (getArgs)
 import Text.Printf (printf)
 import Text.Read (readMaybe)
@@ -25,6 +26,7 @@ executeDay 2 1 inputLines = Day02.part1 inputLines
 executeDay 2 2 inputLines = Day02.part2 inputLines
 executeDay 3 1 inputLines = Day03.part1 inputLines
 executeDay 3 2 inputLines = Day03.part2 inputLines
+executeDay 4 1 inputLines = Day04.part1 inputLines
 executeDay _ part _ = "No such part: " ++ show part
 
 main :: IO ()
