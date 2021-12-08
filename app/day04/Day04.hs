@@ -74,11 +74,14 @@ hasVerticalWin board n = sliceMatched column || hasVerticalWin board (n - 1)
 boardHasWon :: FlatMaybeBoard -> Bool
 boardHasWon board = hasHorizontalWin board || hasVerticalWin board (xSize - 1)
 
-matchBoards :: Draw -> [FlatMaybeBoard] -> (FlatMaybeBoard, Int)
-matchBoards [] boards = error "No match"
-matchBoards (draw : restOfDraws) boards = case find boardHasWon processedBoards of
-  Just board -> (board, draw)
-  Nothing -> matchBoards restOfDraws processedBoards
+matchBoards :: Bool -> Draw -> [FlatMaybeBoard] -> (Maybe FlatMaybeBoard, Maybe Int) -> (FlatMaybeBoard, Int)
+matchBoards True [] _ lastWin = case lastWin of
+  (Just board, Just winningDraw) -> (board, winningDraw)
+  _ -> error "No match 1"
+matchBoards _ [] _ _ = error "No match 2"
+matchBoards pickLastWinner (draw : restOfDraws) boards lastWin = case findIndex boardHasWon processedBoards of
+  Just i -> if pickLastWinner then matchBoards pickLastWinner restOfDraws (take i processedBoards ++ drop (i + 1) processedBoards) (Just $ processedBoards !! i, Just draw) else (processedBoards !! i, draw)
+  Nothing -> matchBoards pickLastWinner restOfDraws processedBoards lastWin
   where
     processedBoards = map (matchBoard draw) boards
 
@@ -87,11 +90,22 @@ sumUnmarked board = [cell | Just cell <- board] & sum
 
 part1 :: [String] -> String
 part1 inputLines =
-  [sumUnmarked winningBoard, finalDraw]
+  [sumUnmarked winningBoard, winningDraw]
     & product
     & show
   where
     (draw, boards) =
       inputLines
         & parseInput
-    (winningBoard, finalDraw) = matchBoards draw (map flattenBoard boards)
+    (winningBoard, winningDraw) = matchBoards False draw (map flattenBoard boards) (Nothing, Nothing)
+
+part2 :: [String] -> String
+part2 inputLines =
+  [sumUnmarked winningBoard, winningDraw]
+    & product
+    & show
+  where
+    (draw, boards) =
+      inputLines
+        & parseInput
+    (winningBoard, winningDraw) = matchBoards True draw (map flattenBoard boards) (Nothing, Nothing)
