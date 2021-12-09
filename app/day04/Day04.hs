@@ -1,8 +1,9 @@
 module Day04 where
 
-import AocUtil (every)
+import AocUtil
 import Data.Function ((&))
 import Data.List
+import Debug.Trace
 
 type Draw = [Int]
 
@@ -74,14 +75,17 @@ hasVerticalWin board n = sliceMatched column || hasVerticalWin board (n - 1)
 boardHasWon :: FlatMaybeBoard -> Bool
 boardHasWon board = hasHorizontalWin board || hasVerticalWin board (xSize - 1)
 
-matchBoards :: Bool -> Draw -> [FlatMaybeBoard] -> (Maybe FlatMaybeBoard, Maybe Int) -> (FlatMaybeBoard, Int)
+matchBoards :: Bool -> Draw -> [FlatMaybeBoard] -> Maybe (FlatMaybeBoard, Int) -> (FlatMaybeBoard, Int)
 matchBoards True [] _ lastWin = case lastWin of
-  (Just board, Just winningDraw) -> (board, winningDraw)
-  _ -> error "No match 1"
-matchBoards _ [] _ _ = error "No match 2"
-matchBoards pickLastWinner (draw : restOfDraws) boards lastWin = case findIndex boardHasWon processedBoards of
-  Just i -> if pickLastWinner then matchBoards pickLastWinner restOfDraws (take i processedBoards ++ drop (i + 1) processedBoards) (Just $ processedBoards !! i, Just draw) else (processedBoards !! i, draw)
-  Nothing -> matchBoards pickLastWinner restOfDraws processedBoards lastWin
+  Just win -> win
+  Nothing -> error "No wins"
+matchBoards _ [] _ _ = error "No match"
+matchBoards pickLastWinner (draw : restOfDraws) boards lastWins = case findIndices boardHasWon processedBoards of
+  [] -> matchBoards pickLastWinner restOfDraws processedBoards lastWins
+  indices ->
+    if pickLastWinner
+      then matchBoards pickLastWinner restOfDraws (dropIndices indices processedBoards) (Just (processedBoards !! last indices, draw))
+      else (processedBoards !! head indices, draw)
   where
     processedBoards = map (matchBoard draw) boards
 
@@ -97,7 +101,7 @@ part1 inputLines =
     (draw, boards) =
       inputLines
         & parseInput
-    (winningBoard, winningDraw) = matchBoards False draw (map flattenBoard boards) (Nothing, Nothing)
+    (winningBoard, winningDraw) = matchBoards False draw (map flattenBoard boards) Nothing
 
 part2 :: [String] -> String
 part2 inputLines =
@@ -108,4 +112,4 @@ part2 inputLines =
     (draw, boards) =
       inputLines
         & parseInput
-    (winningBoard, winningDraw) = matchBoards True draw (map flattenBoard boards) (Nothing, Nothing)
+    (winningBoard, winningDraw) = matchBoards True draw (map flattenBoard boards) Nothing
